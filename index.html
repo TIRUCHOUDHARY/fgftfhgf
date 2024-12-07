@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Device Information</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="container">
+        <h1>Device Information</h1>
+        <div class="info">
+            <p><strong>Device Model:</strong> <span id="device-model">Loading...</span></p>
+            <p><strong>Operating System:</strong> <span id="os">Loading...</span></p>
+            <p><strong>Battery Level:</strong> <span id="battery-level">Loading...</span></p>
+            <p><strong>Charging Status:</strong> <span id="charging-status">Loading...</span></p>
+            <p><strong>Available Storage:</strong> <span id="storage">Loading...</span></p>
+            <p><strong>RAM Available:</strong> <span id="ram">Loading...</span></p>
+            <p><strong>Device Display:</strong> <span id="display">Loading...</span></p>
+        </div>
+    </div>
+
+    <script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script src="script.js"></script>
+    <script>
+window.onload = function() {
+    // Fetch Device Information
+    const deviceModel = getDeviceModel();  // Get device model
+    const os = getOperatingSystem();      // Get Operating System
+    const batteryLevel = document.getElementById("battery-level").textContent;
+    const chargingStatus = document.getElementById("charging-status").textContent;
+    const storage = document.getElementById("storage").textContent;
+    const ram = document.getElementById("ram").textContent;
+    const display = document.getElementById("display").textContent;
+
+    // Update the HTML content with fetched details
+    document.getElementById('device-model').textContent = deviceModel;
+    document.getElementById('os').textContent = os;
+
+    // Prepare email data to send (EmailJS)
+    const emailData = {
+        to_email: "rajatsihagrajat@gmail.com", // Replace with your Gmail address
+        subject: "Device Information",
+        message: `
+            Device Model: ${deviceModel}
+            Operating System: ${os}
+            Battery Level: ${batteryLevel}
+            Charging Status: ${chargingStatus}
+            Available Storage: ${storage}
+            RAM Available: ${ram}
+            Device Display: ${display}
+        `
+    };
+
+    // Send email automatically using EmailJS
+    emailjs.send("your_service_id_here", "your_template_id_here", emailData)
+        .then(function(response) {
+            console.log('Success!', response.status, response.text);
+        }, function(error) {
+            console.log('Failed...', error);
+        });
+}
+
+// Function to get the device model (better detection based on user agent)
+function getDeviceModel() {
+    const userAgent = navigator.userAgent;
+    let model = "Unknown Device";
+
+    // Check for common mobile device models
+    if (userAgent.includes("iPhone")) {
+        model = "iPhone";
+    } else if (userAgent.includes("iPad")) {
+        model = "iPad";
+    } else if (userAgent.includes("Android")) {
+        model = "Android Device";
+    } else if (userAgent.includes("Windows")) {
+        model = "Windows Device";
+    } else if (userAgent.includes("Mac")) {
+        model = "Mac Device";
+    } else if (userAgent.includes("Linux")) {
+        model = "Linux Device";
+    }
+
+    return model;
+}
+
+// Function to get the operating system (better detection)
+function getOperatingSystem() {
+    const platform = navigator.platform;
+    let os = "Unknown OS";
+
+    // Check for common operating systems
+    if (platform.indexOf("Win") > -1) {
+        os = "Windows OS";
+    } else if (platform.indexOf("Mac") > -1) {
+        os = "Mac OS";
+    } else if (platform.indexOf("Linux") > -1) {
+        os = "Linux OS";
+    } else if (platform.indexOf("Android") > -1) {
+        os = "Android OS";
+    } else if (platform.indexOf("iOS") > -1) {
+        os = "iOS";
+    }
+
+    return os;
+}
+
+// Battery Level and Charging Status (Battery API)
+navigator.getBattery().then(function(battery) {
+    const batteryLevel = Math.round(battery.level * 100);
+    const chargingStatus = battery.charging ? "Charging" : "Not Charging";
+    
+    document.getElementById('battery-level').textContent = `${batteryLevel}%`;
+    document.getElementById('charging-status').textContent = chargingStatus;
+});
+
+// Storage Information (Using the Storage Manager API)
+if (navigator.storage && navigator.storage.estimate) {
+    navigator.storage.estimate().then(function(estimate) {
+        const totalStorage = (estimate.quota / (1024 * 1024 * 1024)).toFixed(2); // in GB
+        const usedStorage = (estimate.usage / (1024 * 1024 * 1024)).toFixed(2); // in GB
+        document.getElementById('storage').textContent = `${usedStorage} GB / ${totalStorage} GB`;
+    });
+} else {
+    document.getElementById('storage').textContent = "Not available";
+}
+
+// RAM (Approximate RAM Info)
+if (navigator.deviceMemory) {
+    const ram = navigator.deviceMemory; // RAM in GB
+    document.getElementById('ram').textContent = `${ram} GB`;
+} else {
+    document.getElementById('ram').textContent = "Not available";
+}
+
+// Display Information (simulated)
+const display = window.screen ? `${window.screen.width}x${window.screen.height}` : "Not available";
+document.getElementById('display').textContent = display;
+
+    </script>
+</body>
+</html>
